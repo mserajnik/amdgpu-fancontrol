@@ -1,29 +1,27 @@
 #!/bin/bash
 
-HYSTERESIS=6000   # in mK
+HYSTERESIS=4000   # in mK
 SLEEP_INTERVAL=1  # in s
 DEBUG=true
 
 # set temps (in degrees C * 1000) and corresponding pwm values in ascending order and with the same amount of values
-TEMPS=( 65000 80000 90000 )
-PWMS=(      0   153   255 )
+TEMPS=( 60000 65000 80000 95000 )
+PWMS=(  102   128   191   255 )
 
 # hwmon paths, hardcoded for one amdgpu card, adjust as needed
 FILE_PWM=$(echo /sys/class/drm/card0/device/hwmon/hwmon?/pwm1)
 FILE_FANMODE=$(echo /sys/class/drm/card0/device/hwmon/hwmon?/pwm1_enable)
-FILE_TEMP=$(echo /sys/class/drm/card0/device/hwmon/hwmon?/temp1_input)
-# might want to use this later
-#FILE_TEMP_CRIT=$(echo /sys/class/hwmon/hwmon?/temp1_crit_hyst)
+FILE_TEMP=$(echo /sys/class/drm/card0/device/hwmon/hwmon?/temp2_input)
 
 # load configuration file if present
 [ -f /etc/amdgpu-fancontrol.cfg ] && . /etc/amdgpu-fancontrol.cfg
 
-[[ -f "$FILE_PWM" && -f "$FILE_FANMODE" && -f "$FILE_TEMP" ]] || { echo "invalid hwmon files" ; exit 1; }
+[[ -f "$FILE_PWM" && -f "$FILE_FANMODE" && -f "$FILE_TEMP" ]] || { echo "Invalid hwmon files" ; exit 1; }
 
 # check if amount of temps and pwm values match
 if [ "${#TEMPS[@]}" -ne "${#PWMS[@]}" ]
 then
-  echo "Amount of temperature and pwm values does not match"
+  echo "Amount of temperature and PWM values does not match"
   exit 1
 fi
 
@@ -42,7 +40,7 @@ function debug {
 
 # set fan mode to max(0), manual(1) or auto(2)
 function set_fanmode {
-  echo "setting fan mode to $1"
+  echo "Setting fan mode to $1"
   echo "$1" > "$FILE_FANMODE"
 }
 
@@ -50,29 +48,35 @@ function set_pwm {
   NEW_PWM=$1
   OLD_PWM=$(cat $FILE_PWM)
 
-  debug "current pwm: $OLD_PWM, requested to set pwm to $NEW_PWM"
+  debug "Current PWM: $OLD_PWM. Requested to set PWM to $NEW_PWM"
   if [ $(cat ${FILE_FANMODE}) -ne 1 ]
   then
-    echo "Fanmode not set to manual."
+    echo "Fan mode not set to manual"
     set_fanmode 1
   fi
 
   if [ -z "$TEMP_AT_LAST_PWM_CHANGE" ] || [ "$TEMP" -gt "$TEMP_AT_LAST_PWM_CHANGE" ] || [ $(($(cat $FILE_TEMP) + HYSTERESIS)) -le "$TEMP_AT_LAST_PWM_CHANGE" ]; then
-    $DEBUG || echo "current temp: $TEMP"
-    echo "temp at last change was $TEMP_AT_LAST_PWM_CHANGE"
-    echo "changing pwm to $NEW_PWM"
+    debug "Temperature at last change was $TEMP_AT_LAST_PWM_CHANGE"
+    debug "Changing PWM to $NEW_PWM"
     echo "$NEW_PWM" > "$FILE_PWM"
     TEMP_AT_LAST_PWM_CHANGE=$(cat $FILE_TEMP)
   else
-    debug "not changing pwm, we just did at $TEMP_AT_LAST_PWM_CHANGE, next change when below $((TEMP_AT_LAST_PWM_CHANGE - HYSTERESIS))"
+    debug "Not changing PWM, we just did at $TEMP_AT_LAST_PWM_CHANGE. Next change when below $((TEMP_AT_LAST_PWM_CHANGE - HYSTERESIS))"
   fi
 }
 
 function interpolate_pwm {
   i=0
+
+  if [[ ! -f "$FILE_TEMP" || ! $(cat $FILE_TEMP) -gt 0 ]]; then
+    # failsafe in case the temperature readout suddenly becomes unavailable
+    echo "Cannot read temperature, starting emergency exit"
+    emergency_exit
+  fi
+
   TEMP=$(cat $FILE_TEMP)
 
-  debug "current temp: $TEMP"
+  debug "Current temperature: $TEMP"
 
   if [[ $TEMP -le ${TEMPS[0]} ]]; then
     # below first point in list, set to min speed
@@ -95,14 +99,20 @@ function interpolate_pwm {
     LOWERPWM=${PWMS[i-1]}
     HIGHERPWM=${PWMS[i]}
     PWM=$(echo "( ( $TEMP - $LOWERTEMP ) * ( $HIGHERPWM - $LOWERPWM ) / ( $HIGHERTEMP - $LOWERTEMP ) ) + $LOWERPWM" | bc)
-    debug "interpolated pwm value for temperature $TEMP is: $PWM"
+    debug "Interpolated PWM value for temperature $TEMP is: $PWM"
     set_pwm "$PWM"
     return
   done
 }
 
+function emergency_exit {
+  echo "255" > "$FILE_PWM"
+  sleep 3
+  reset_on_exit
+}
+
 function reset_on_exit {
-  echo "exiting, resetting fan to auto control..."
+  echo "Exiting, resetting fan to auto control"
   set_fanmode 2
   exit 0
 }
@@ -123,4 +133,3 @@ set_fanmode 1
 
 # finally start the loop
 run_daemon
-

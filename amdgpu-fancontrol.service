@@ -1,9 +1,12 @@
 [Unit]
 Description=amdgpu-fancontrol
+StartLimitIntervalSec=60
+StartLimitBurst=6
 
 [Service]
-Type=simple
 ExecStart=/usr/bin/amdgpu-fancontrol
+Restart=on-failure
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
