@@ -7,7 +7,7 @@ pkgrel=1
 arch=('any')
 license=('GPL')
 depends=('systemd' 'bc')
-
+backup=("etc/amdgpu-fancontrol.cfg")
 source=('amdgpu-fancontrol' 'amdgpu-fancontrol.service' 'etc-amdgpu-fancontrol.cfg')
 sha256sums=('cdcac0bbde7dbb2f331e0ddde74de98d5a2120e0f462067197ae00eeb284f6da'
             '603031d58a1d6a16242fe24296ee6787d17cdcd347b1235e869936ec70203c29'
