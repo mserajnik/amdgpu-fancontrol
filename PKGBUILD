@@ -1,5 +1,3 @@
-# Maintainer: grmat <grmat@sub.red>
-
 pkgname=amdgpu-fancontrol
 pkgdesc="amdgpu-fancontrol"
 pkgver=1.0
@@ -9,7 +7,7 @@ license=('GPL')
 depends=('systemd' 'bc')
 backup=("etc/amdgpu-fancontrol.cfg")
 source=('amdgpu-fancontrol' 'amdgpu-fancontrol.service' 'etc-amdgpu-fancontrol.cfg')
-sha256sums=('cdcac0bbde7dbb2f331e0ddde74de98d5a2120e0f462067197ae00eeb284f6da'
+sha256sums=('c1783eb8d8cee21b97f336116fc42dd74e546de06c07a2b975b84c0d8a4094b4'
             '603031d58a1d6a16242fe24296ee6787d17cdcd347b1235e869936ec70203c29'
             'f2ff0800fc13730c8aa591fa9b31002aa7bd860c23fc13b88c92b4e1e3a60aa3')
 

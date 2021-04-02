@@ -1,13 +1,20 @@
 # amdgpu-fancontrol
 
-Simple bash script to control AMD Radeon graphics cards fan pwm. Adjust
-temp/pwm values and hysteresis/interval in the script as desired. Other
-adjustments, such as the correct hwmon path might be required as well.
+> A simple bash script to control the fan speed of AMD graphics cards
 
-This script was initially meant as an example. Please don't just run it naively
-and keep in mind that I'm not responsible for failures.
+This is a simple bash script to control the fan speed of AMD graphics cards.
+The project has originally been forked from
+[grmat/amdgpu-fancontrol][original-project] and adjusted for my needs as a
+temporary tool to use while I work on my own, more elaborate solution. As such,
+I didn't invest much time to bring this up to my personal standards in regards
+to documentation, installation and ease of use.
 
-## Fork changes
+The script can be configured via `/etc/amdgpu-fancontrol.cfg`
+([example configuration](etc-amdgpu-fancontrol.cfg)). A
+[systemd service configuration](amdgpu-fancontrol.service) as well as a
+[PKGBUILD](PKGBUILD) for Arch-based distributions are available.
+
+## My changes
 
 __Note:__ Due to a bug, the current PWM value is not reported accurately (it
 always shows 0) with the fan mode set to manual (so when using this script), at
@@ -15,8 +22,8 @@ least on some cards (including my RX 6900 XT). This doesn't mean this script
 doesn't work correctly: adjusting the PWM value still works fine, it's just the
 hwmon readback that's wrong (which has no influence on the functionality of the
 script, aside from resulting in incorrect debug output). This issue will
-supposedly be fixed in kernel 5.12. See [here][pwm-bug] for
-details (particularly [this comment][pwm-bug-explained]).
+supposedly be fixed in kernel 5.12. See [here][pwm-bug] for details
+(particularly [this comment][pwm-bug-explained]).
 
 + By default, `temp2_input` is used, which should be the junction temperature
   on RX 5xxx series cards and newer. This temperature represents the hottest
@@ -39,5 +46,6 @@ details (particularly [this comment][pwm-bug-explained]).
 + Further quieted down the output when not using debug mode to prevent journal
   spam
 
+[original-project]: https://github.com/grmat/amdgpu-fancontrol
 [pwm-bug]: https://gitlab.freedesktop.org/drm/amd/-/issues/1164
 [pwm-bug-explained]: https://gitlab.freedesktop.org/drm/amd/-/issues/1164#note_599349
