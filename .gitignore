@@ -1,13 +1,5 @@
-*.tar
-*.tar.*
-*.jar
-*.exe
-*.msi
-*.zip
-*.tgz
-*.log
-*.log.*
-*.sig
+/amdgpu-fancontrol
+/pkg
+/src
 
-pkg/
-src/
+*.pkg.tar*
