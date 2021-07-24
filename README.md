@@ -16,15 +16,6 @@ The script can be configured via `/etc/amdgpu-fancontrol.cfg`
 
 ## My changes
 
-__Note:__ Due to a bug, the current PWM value is not reported accurately (it
-always shows 0) with the fan mode set to manual (so when using this script), at
-least on some cards (including my RX 6900 XT). This doesn't mean this script
-doesn't work correctly: adjusting the PWM value still works fine, it's just the
-hwmon readback that's wrong (which has no influence on the functionality of the
-script, aside from resulting in incorrect debug output). This issue will
-supposedly be fixed in kernel 5.12. See [here][pwm-bug] for details
-(particularly [this comment][pwm-bug-explained]).
-
 + By default, `temp2_input` is used, which should be the junction temperature
   on RX 5xxx series cards and newer. This temperature represents the hottest
   point at any given moment and is also what is used to control custom fan
