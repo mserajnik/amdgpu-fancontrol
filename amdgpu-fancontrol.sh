@@ -19,7 +19,7 @@
 
 HYSTERESIS=4000   # in mK
 SLEEP_INTERVAL=1  # in s
-DEBUG=true
+DEBUG=false
 
 # set temps (in degrees C * 1000) and corresponding pwm values in ascending order and with the same amount of values
 TEMPS=( 60000 65000 80000 95000 )
