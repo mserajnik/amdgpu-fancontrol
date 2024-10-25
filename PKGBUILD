@@ -5,13 +5,13 @@ pkgver=1
 pkgrel=1
 pkgdesc="A simple bash script to control the fan speed of AMD graphics cards"
 arch=("any")
-url="https://sr.ht/~mser/${_pkgname}/"
+url="https://github.com/mserajnik/${_pkgname}/"
 license=("GPL3")
 depends=("bc" "systemd")
 provides=("amdgpu-fancontrol")
 conflicts=("amdgpu-fancontrol")
 backup=("etc/amdgpu-fancontrol.cfg")
-source=("${_pkgname}::git+https://git.sr.ht/~mser/amdgpu-fancontrol")
+source=("${_pkgname}::git+https://github.com/mserajnik/amdgpu-fancontrol.git")
 md5sums=("SKIP")
 
 pkgver() {
